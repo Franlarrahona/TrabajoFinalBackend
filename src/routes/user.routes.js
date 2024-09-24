@@ -1,9 +1,21 @@
 import { Router } from "express";
 import Controller from '../controllers/user.controller.js'
 import config from "../config.js";
+import nodemailer from 'nodemailer';
 
 const router = Router();
 const controller = new Controller();
+
+const transport = nodemailer.createTransport({
+    service:'gmail',
+    port:587,
+    auth:{
+        user:config.GMAIL_APP_USER,
+        pass:config.GMAIL_APP_PASS
+    }
+})
+
+
 /*
 router.get('/', async(req,res) =>{
     try{
@@ -95,6 +107,16 @@ router.delete('/deleteInactive', async (req,res) =>{
         //buscar usuario que no se haya conectado en 2 dias
         const result = await controller.deleteMany({ lastLogin: { $lt: twoDaysAgo } });
         console.log(`Usuarios eliminados: ${result.deletedCount}`);
+        
+        
+        
+        const mail = await transport.sendMail({
+            from:`propietario de la pagina <${config.GMAIL_APP_USER}`,
+            to: result.email,
+            subject: 'cuenta suspendida',
+            html:'<p> debido a la inactividad de la cuenta, la misma fue suspendida </p>'
+        })
+
         return result.deletedCount;
     } catch(err){
         console.error('error al eliminar usuarios inactivos')
