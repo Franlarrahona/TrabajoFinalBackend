@@ -1,0 +1,86 @@
+<div id="managerBody">
+    <div class="box">
+        <h1 class="titulo1"id="managerTitulo1">Administrador de usuarios</h1>
+        <div id="productBox">  
+            {{#each data}}
+            <div class="box" id="userBox">
+                <p id="managerText">nombre: {{this.firstName}} {{this.lastName}} </p>
+                <p id="managerText">email: {{this.email}}</p>
+                <p id="managerText">rol: {{this.role}}</p>
+                <form id="userManagerForm" action="/api/users/changeRole" method="POST">
+                    <input type="hidden" name="userId" value="{{this._id}}">
+                    <select class="inputs" id="rolSelect" name="rol" required="required">
+                        <option value="admin">admin</option>
+                        <option value="premiun">premiun</option>
+                        <option value="user">user</option>
+                    </select>
+                    <button class="btn" id="changeRolBtn" type="submit">Guardar cambios</button>
+                </form>
+                <button class="btn btnLogout2" data-id="{{this._id}}" >Eliminar</button>
+            </div>
+            {{/each}}
+        </div> 
+    </div>     
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () =>{
+        console.log('DOM fully loaded and parsed');
+
+        const buttons = document.querySelectorAll('.btnLogout2');
+        console.log('botones de eliminar', buttons);
+
+        buttons.forEach(button => {
+            button.addEventListener('click', async function(){
+                const userId = this.getAttribute('data-id');
+
+                console.log('usuario Id:', userId);
+
+                try{
+                    const response = await fetch('/api/users/delete',{
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body:JSON.stringify({ userId })
+                    });
+
+                    const contentType = response.headers.get('Content-Type');
+                    let result
+
+                    if(contentType && contentType.includes('application/json')){
+                    result = await response.json();
+                    }else{
+                        result = await response.text();
+                    }
+                    
+                    if(response.ok) {
+                        Toastify({
+                            text: "usuario eliminado",
+                            duration:2000,
+                            gravity:"bottom",
+                            position:"right",
+                            backgroundColor: "linear-gradient(to right, #d9534f, #e53935)"
+                        }).showToast();                       
+                        ;
+                        setTimeout(() =>{
+                            window.location.reload();
+                        },2000)
+
+                    }else{
+                        console.error('error del servidor', result)
+                        Toastify({
+                            text: "Error al eliminar el usuario",
+                            duration:2000,
+                            gravity:"bottom",
+                            position:"right",
+                            backgroundColor: "linear-gradient(to right, #d9534f, #e53935)"
+                        }).showToast(); 
+                    }
+                }catch(error){
+                    console.log('error al eliminar el usuario', error)
+                }
+            })
+        })
+    })
+</script>

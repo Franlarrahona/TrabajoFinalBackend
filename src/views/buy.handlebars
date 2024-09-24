@@ -1,0 +1,17 @@
+<div id="loginBody">
+    <div class="box" id="loginBox">
+        <h1 class="titulo1" id="cartTitulo1">Resumen de compra</h1>
+    </div>
+    {{#each data.products}}
+    <div  id="cartItemBox2">
+        <p id="cartItemText">•{{this._id.nombre}}</p>
+        <p id="cartItemText">cantidad: {{this.qty}}</p>
+        <p id="cartItemText">${{this.subtotal}}</p>
+    </div>
+    {{/each}}
+    
+    <div class="box" id="buyBox"> 
+        <p id="buytItemText">total: ${{total}}</p>
+        <a  class="enlace1" id="buyEnlace"> ir al Pago </a>
+    </div>
+</div>

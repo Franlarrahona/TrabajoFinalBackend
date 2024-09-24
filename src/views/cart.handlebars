@@ -1,0 +1,84 @@
+<div id="loginBody">
+    <div class="box" id="loginBox">
+        <h1 class="titulo1" id="cartTitulo1"> mi carrito </h1>
+        <div >
+            {{#each data.products}}
+            <div id="cartItemBox">
+                <p id="cartItemText">•{{this._id.nombre}}</p>
+                <p id="cartItemText">${{this._id.precio}}</p>
+                <p id="cartItemText">cantidad: {{this.qty}}</p>
+                <button class="btn deleteCartItemBtn" data-id="{{this._id._id}}" >X</button>
+            </div>
+            {{/each}}
+        </div>
+        <div class="box" id="buyBtnBox" >
+        <a href="/buy" class="enlace1" id="buyEnlace" > iniciar Compra</a>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script>
+    
+
+    document.addEventListener('DOMContentLoaded', () =>{
+        console.log('DOM fully loaded and parsed');
+
+        const buttons = document.querySelectorAll('.deleteCartItemBtn');
+        console.log('Botones de eliminar:', buttons);
+
+        buttons.forEach(button => {
+            button.addEventListener('click', async function(){
+                const productId = this.getAttribute('data-id');
+
+                console.log('Producto ID:', productId);
+
+                try{
+                    const response = await fetch('/api/carts/delete', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body:JSON.stringify({ productId })
+                    });
+
+                    
+                    const contentType = response.headers.get('Content-Type');
+                    let result                 
+
+                    if(contentType && contentType.includes('application/json')){
+                        result = await response.json();
+                    }else{
+                        result = await response.text();
+                    }
+
+                    if(response.ok) {  
+                        Toastify({
+                            text: "producto eliminado",
+                            duration:2000,
+                            gravity:"bottom",
+                            position:"right",
+                            backgroundColor: "linear-gradient(to right, #d9534f, #e53935)"
+                        }).showToast();                       
+                        ;
+                        setTimeout(() =>{
+                            window.location.reload();
+                        },2000)
+                        
+                    
+                    }else{
+                        console.error('error del servidor', result)
+                        Toastify({
+                            text: "Error al eliminar el producto",
+                            duration:2000,
+                            gravity:"bottom",
+                            position:"right",
+                            backgroundColor: "linear-gradient(to right, #d9534f, #e53935)"
+                        }).showToast(); 
+                    }
+                } catch(error){
+                    console.log('error al eliminar el producto', error)
+                }
+            })
+        })
+    })
+</script>

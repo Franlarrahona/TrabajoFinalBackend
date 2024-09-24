@@ -1,0 +1,85 @@
+<header id="headerProducts">
+    <h1 class="titulo1" id="productsTitulo1">Productos</h1>
+    <a href="/profile" id="miPerfilEnlace"> mi perfil</a>
+    <h3 id="h3Products">{{user._doc.firstName}} {{user._doc.lastName}}</h3>
+    <a id="carritoEnlace" href="/cart">carrito</a>
+</header>
+<div id="productsBody">
+    <div id="productsBox">
+        {{#each data.docs}}
+        <div class="box" id="itemBox" >
+            <div id="nameAndDescription">
+                <h4 class="titulo1" id="itemProductsTitulo1">{{this.nombre}}</h4>
+                <p id="productDescription">{{this.descripcion}}</p>
+            </div>
+            <div id="priceAndBtn">
+                <p id="price">${{this.precio}}</p>
+                <button class="btn addCartBtn" data-id="{{this._id}}">agregar al carrito</button>
+            </div>
+        </div>
+        {{/each}}
+    </div>
+    <div id="containerBtnPagginate">
+        {{#if data.prevPage}}
+        <a class="btnPagginate" href="/products/{{data.prevPage}}"><</a>
+        {{/if}}
+        
+        
+        
+        {{#if data.nextPage}}
+        <a  class="btnPagginate" href="/products/{{data.nextPage}}">></a>
+        {{/if}}
+    </div>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('DOM fully loaded and parsed');
+
+
+        const buttons = document.querySelectorAll('.addCartBtn');
+        console.log('Botones de agregar al carrito:', buttons);
+
+        buttons.forEach(button => {
+            button.addEventListener('click', async function(){
+                const productId = this.getAttribute('data-id');
+
+                console.log('Producto ID:', productId);
+                try{
+                    
+                    const response = await fetch('/api/carts/add' , {
+                        method: 'POST',
+                        headers: {
+                            'content-Type': 'application/json'
+                        },
+                        body:JSON.stringify({ productId })
+                    });
+
+                    let result 
+                    const contentType = response.headers.get('Content-Type');
+
+                    if(contentType && contentType.includes('application/json')){
+                        result = await response.json();
+                    }else{
+                        result = await response.text();
+                    }
+
+                    if(response.ok){
+                        Toastify({
+                            text: "producto agregado al carrito",
+                            duration:2000,
+                            gravity:"bottom",
+                            position:"right",
+                            backgroundColor: "linear-gradient(to right, #28a745, #218838)"
+                        }).showToast(); 
+                    }else{
+                        console.error('error del servidor', result)
+                        alert( 'hubo un problema al agregar el producto al carrito', result)
+                    }
+                } catch(error){
+                    console.error('error al agregar al carrito', error);
+                }
+            });
+        })
+    });
+</script>
